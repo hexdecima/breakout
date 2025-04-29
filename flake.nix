@@ -14,6 +14,7 @@
 
       perSystem = { system, ... }:
         let
+          inherit (nixpkgs) lib;
           overlays = [ (import rust) ];
           pkgs = import nixpkgs { inherit system overlays; };
           toolchain = pkgs.pkgsBuildHost.rust-bin.fromRustupToolchainFile
@@ -23,17 +24,19 @@
             rustc = toolchain;
           };
 
-          bevyDeps = with pkgs; [
-            libgcc
-            pkg-config
-            xorg.libX11
-            alsa-lib
-            libudev-zero
-            libxkbcommon
-            wayland
-          ];
+          bevyDeps = with pkgs;
+            [
+              libgcc
+              pkg-config
+              alsa-lib-with-plugins
+              libudev-zero
+              libxkbcommon
+              wayland
+              vulkan-loader
+            ] ++ (with xorg; [ libX11 libXcursor libXi ]);
         in {
           devShells.default = pkgs.mkShell {
+            LD_LIBRARY_PATH = lib.makeLibraryPath bevyDeps;
             packages = bevyDeps
               ++ (with pkgs; [ toolchain just bacon nil nixfmt-classic taplo ]);
           };
