@@ -1,5 +1,10 @@
-use bevy::prelude::App;
+use bevy::prelude::*;
 
 fn main() {
-    App::new().run();
+    let mut app = App::new();
+    app.add_plugins(DefaultPlugins).add_systems(Update, || {
+        println!("nyan!");
+    });
+
+    app.run();
 }
